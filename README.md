@@ -3,7 +3,7 @@
 
 ### About this method
 
-The Euclidean distance estimation methods is an important statistical methods which  helps to accurately measure the distance between two points based on various characteristics.
+The Euclidean distance estimation methods is an important statistical method which  helps to accurately measure the distance between two points based on various characteristics.
 For more information about the method, including how is being used, when and by who, please refer to the Methods toolbox documentation on our [FutureNHS workspace](https://future.nhs.uk/DataMeth/grouphome).
 
 
