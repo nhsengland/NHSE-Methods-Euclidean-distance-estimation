@@ -1,0 +1,87 @@
+The Python scripts to develop the Euclidean distance calculations: 
+///////
+# List all non-standard packages to be imported by your 
+# script here (only missing packages will be installed)
+from ayx import Package
+#Package.installPackages(['pandas','numpy'])
+
+from ayx import Alteryx
+import numpy as np
+import pandas as pd
+from scipy.spatial import distance
+
+#Import data
+df = Alteryx.read("#1")
+df.head()
+
+#Standardizing data (Average and Standard Deviation) ALL BASED ON NAME
+grpName = df.drop(['Procode','Weight'], axis = 1)
+grpName1 = grpName.groupby('Name').mean()
+grpName2 = grpName.groupby('Name').std().round(5)
+display(grpName1,grpName2)
+
+grpName1 = grpName1.rename(columns={'Value':'ValueAve'})
+#this makes the index to a column
+grpName1 = grpName1.reset_index() 
+grpName1.head()
+
+grpName2 = grpName2.rename(columns={'Value':'ValueSTD'})
+grpName2 = grpName2.reset_index()
+grpName2.head()
+
+#Merge STD and AVE values
+grpName3 = pd.merge(grpName1,grpName2, on='Name')
+grpName3
+
+#Merge ave and std with orig. data
+df2 = pd.merge(df,grpName3,on='Name')
+df2.head()
+
+#Standardized Value Function
+def stdval(row):
+    return ((row['Value']-row['ValueAve'])/row['ValueSTD'])*row['Weight']
+	
+#apply standardized value function
+df2['StandardizedValue'] = df2.apply(stdval, axis=1)
+
+#Sum Standardized Value BY Name
+grpPRO = df2.drop(['Value','Weight','ValueAve','ValueSTD'], axis = 1)
+grpPRO1 = grpPRO.groupby(['Name','Procode']).sum()
+grpPRO1 = grpPRO1.reset_index()
+grpPRO1 = grpPRO1.rename(columns={'StandardizedValue':'Sum_StandardizedValue'})
+grpPRO1.head()
+
+#Merge Standardized values with ave and std df
+df3 = pd.merge(df2,grpPRO1,on=['Name'],how='outer')
+df3.head(5)
+
+#Calc Euclidean Distance
+def calc_dist(row):
+    return distance.euclidean(row['StandardizedValue'],row['Sum_StandardizedValue'])
+
+#apply euc dist function
+df3['EuclideanDistance'] = df3.apply(calc_dist,axis=1)
+df3.head(10)
+
+#remove unecessary columns
+df3 = df3.drop(['Name','Value','Weight','ValueAve','ValueSTD','StandardizedValue','Sum_StandardizedValue'], axis = 1)
+df3.head()
+
+#Sorting Euclidean Distance - smallest first by Chosen Trust
+MyTrust = df3[df3['Procode_x'] == 'R0A']
+MyTrust = MyTrust.sort_values(by='EuclideanDistance')
+MyTrust.head(10)
+
+df3 = df3.groupby(['Procode_x','Procode_y']).sum()
+df3 = df3.reset_index()
+df3.head()
+
+#output
+Alteryx.write(df3,2)
+
+MyTrust = df3[df3['Procode_x'] == 'R0A']
+MyTrust.head(10)
+
+MyTrust.sort_values(by='EuclideanDistance')
+
+////////
