@@ -47,7 +47,3 @@ This Python code develops the Euclidean distance calculations. Firstly, it reads
 Felix Asamoah, Senior Analytical Manager - felix.asamoah1@nhs.net 
 
 
-### License
-
-This project is licensed under the [MIT License](LICENSE.md).
-
