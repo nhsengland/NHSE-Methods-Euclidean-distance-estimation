@@ -1,4 +1,4 @@
-## NHSEI Methods: Euclidean distance estimation
+## NHSE Methods: Euclidean distance estimation
 
 
 ### About this method
